@@ -1,10 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
- 
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,4 +5,155 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+//
+// ENUMS
+//
+
+enum OnboardingStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum SessionType {
+  onboarding
+  coaching
+}
+
+enum SessionStatus {
+  active
+  closed
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+enum PlanStatus {
+  active
+  archived
+}
+
+//
+// MODELS
+//
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  profile     UserProfile?
+  onboarding  Onboarding?
+  sessions    Session[]
+  plans       Plan[]
+  checkins    Checkin[]
+
+  @@index([email])
+}
+
+model UserProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  age                 Int?
+  sex                 String?  // e.g. "male", "female", "other" - keep flexible for now
+  height              Float?   // in cm
+  weight              Float?   // in kg
+  activityLevel       String?  // e.g. "sedentary", "light", "moderate", "high"
+  dietaryPreferences  String?  // e.g. "halal, high-protein"
+  constraints         String?  // e.g. "no dairy, no gluten"
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Onboarding {
+  id               String            @id @default(uuid())
+  userId           String            @unique
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status           OnboardingStatus  @default(not_started)
+  goalData         Json?
+  currentStateData Json?
+  routineData      Json?
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Session {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      SessionType
+  status    SessionStatus  @default(active)
+
+  messages  Message[]
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
+}
+
+model Message {
+  id        String       @id @default(uuid())
+  sessionId String
+  session   Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  role      MessageRole
+  content   String
+  createdAt DateTime     @default(now())
+
+  @@index([sessionId, createdAt])
+}
+
+model Plan {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  planData  Json
+  status    PlanStatus  @default(active)
+
+  checkins  Checkin[]
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, status])
+}
+
+model Checkin {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  planId       String?
+  plan         Plan?     @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  date         DateTime
+  energy       Int       // 1–5
+  mood         Int       // 1–5
+  sleepQuality Int       // 1–5
+  adherence    Int       // 0–100
+  note         String?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId, date])
+  @@index([planId, date])
 }
