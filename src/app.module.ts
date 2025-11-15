@@ -16,6 +16,7 @@ import { SessionsModule } from './sessions/sessions.module';
 import { PlansModule } from './plans/plans.module';
 import { CheckinsModule } from './checkins/checkins.module';
 import { AiModule } from './ai/ai.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -38,5 +39,6 @@ import { AiModule } from './ai/ai.module';
     CheckinsModule,
     AiModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
