@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { CheckinsService } from './checkins.service';
+import { CheckinsController } from './checkins.controller';
 
-@Module({})
+@Module({
+  controllers: [CheckinsController],
+  providers: [CheckinsService],
+})
 export class CheckinsModule {}
