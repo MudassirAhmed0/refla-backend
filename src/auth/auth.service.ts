@@ -27,7 +27,7 @@ export class AuthService {
 
     const accessToken = await this.signToken(user.id);
 
-    return { accessToken, user };
+    return { accessToken, user: this.sanitizeUser(user) };
   }
 
   async login(dto: LoginDto) {
@@ -39,10 +39,15 @@ export class AuthService {
 
     const accessToken = await this.signToken(user.id);
 
-    return { accessToken, user };
+    return { accessToken, user: this.sanitizeUser(user) };
   }
 
   async signToken(userId: string): Promise<string> {
     return this.jwt.signAsync({ userId });
+  }
+
+  private sanitizeUser(user: any) {
+    const { passwordHash, ...rest } = user;
+    return rest;
   }
 }
