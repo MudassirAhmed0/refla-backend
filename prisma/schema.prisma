@@ -11,6 +11,11 @@ datasource db {
 // ENUMS
 //
 
+enum AuthProvider {
+  local
+  google
+}
+
 enum OnboardingStatus {
   not_started
   in_progress
@@ -43,20 +48,27 @@ enum PlanStatus {
 //
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String?       // optional for OAuth-only accounts
+
+  provider     AuthProvider  @default(local)
+  providerId   String?       // Google profile ID, etc.
+  name         String?
+  avatarUrl    String?
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   // Relations
-  profile    UserProfile?
-  onboarding Onboarding?
-  sessions   Session[]
-  plans      Plan[]
-  checkins   Checkin[]
+  profile     UserProfile?
+  onboarding  Onboarding?
+  sessions    Session[]
+  plans       Plan[]
+  checkins    Checkin[]
 
   @@index([email])
+  @@index([provider, providerId])
 }
 
 model UserProfile {
