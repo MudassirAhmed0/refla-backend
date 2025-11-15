@@ -43,116 +43,116 @@ enum PlanStatus {
 //
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
+  id           String   @id @default(uuid())
+  email        String   @unique
   passwordHash String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  profile     UserProfile?
-  onboarding  Onboarding?
-  sessions    Session[]
-  plans       Plan[]
-  checkins    Checkin[]
+  profile    UserProfile?
+  onboarding Onboarding?
+  sessions   Session[]
+  plans      Plan[]
+  checkins   Checkin[]
 
   @@index([email])
 }
 
 model UserProfile {
-  id                  String   @id @default(uuid())
-  userId              String   @unique
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  age                 Int?
-  sex                 String?  // e.g. "male", "female", "other" - keep flexible for now
-  height              Float?   // in cm
-  weight              Float?   // in kg
-  activityLevel       String?  // e.g. "sedentary", "light", "moderate", "high"
-  dietaryPreferences  String?  // e.g. "halal, high-protein"
-  constraints         String?  // e.g. "no dairy, no gluten"
+  age                Int?
+  sex                String? // e.g. "male", "female", "other" - keep flexible for now
+  height             Float? // in cm
+  weight             Float? // in kg
+  activityLevel      String? // e.g. "sedentary", "light", "moderate", "high"
+  dietaryPreferences String? // e.g. "halal, high-protein"
+  constraints        String? // e.g. "no dairy, no gluten"
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Onboarding {
-  id               String            @id @default(uuid())
-  userId           String            @unique
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  status           OnboardingStatus  @default(not_started)
+  status           OnboardingStatus @default(not_started)
   goalData         Json?
   currentStateData Json?
   routineData      Json?
 
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
-  id        String         @id @default(uuid())
-  userId    String
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type      SessionType
-  status    SessionStatus  @default(active)
+  type   SessionType
+  status SessionStatus @default(active)
 
-  messages  Message[]
+  messages Message[]
 
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, status])
 }
 
 model Message {
-  id        String       @id @default(uuid())
+  id        String  @id @default(uuid())
   sessionId String
-  session   Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   role      MessageRole
   content   String
-  createdAt DateTime     @default(now())
+  createdAt DateTime    @default(now())
 
   @@index([sessionId, createdAt])
 }
 
 model Plan {
-  id        String      @id @default(uuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  planData  Json
-  status    PlanStatus  @default(active)
+  planData Json
+  status   PlanStatus @default(active)
 
-  checkins  Checkin[]
+  checkins Checkin[]
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, status])
 }
 
 model Checkin {
-  id           String    @id @default(uuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  planId       String?
-  plan         Plan?     @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planId String?
+  plan   Plan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
 
   date         DateTime
-  energy       Int       // 1–5
-  mood         Int       // 1–5
-  sleepQuality Int       // 1–5
-  adherence    Int       // 0–100
+  energy       Int // 1–5
+  mood         Int // 1–5
+  sleepQuality Int // 1–5
+  adherence    Int // 0–100
   note         String?
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, date])
   @@index([planId, date])
