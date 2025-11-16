@@ -5,10 +5,12 @@ import {
     Req,
     Put,
     Body,
+    ForbiddenException,
   } from '@nestjs/common';
   import { JwtAuthGuard } from '@/auth/jwt.guard';
   import { ProfileService } from './profile.service';
   import { UpdateProfileDto } from './dto/update-profile.dto';
+import { sanitizeUser } from '@/users/sanitize-user';
   
   @Controller()
   export class ProfileController {
@@ -17,7 +19,9 @@ import {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async getMe(@Req() req: any) {
-      return this.profileService.getMe(req.user.id);
+        const user = await this.profileService.getMe(req.user.id);
+        if(!user) throw new ForbiddenException("User Doesn't Exist")
+        return sanitizeUser(user);
     }
   
     @UseGuards(JwtAuthGuard)

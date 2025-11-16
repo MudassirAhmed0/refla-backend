@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthProvider } from '@prisma/client';
 import { Profile as GoogleProfile } from 'passport-google-oauth20';
+import { sanitizeUser } from '@/users/sanitize-user';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +30,7 @@ export class AuthService {
 
     const accessToken = await this.signToken(user.id);
 
-    return { accessToken, user: this.sanitizeUser(user) };
+    return { accessToken, user:  sanitizeUser(user) };
   }
 
   async login(dto: LoginDto) {
@@ -47,7 +48,7 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Invalid credentials');
   
     const accessToken = await this.signToken(user.id);
-    return { accessToken, user: this.sanitizeUser(user) };
+    return { accessToken, user: sanitizeUser(user) };
   }
 
   async validateGoogleLogin(profile: GoogleProfile) {
@@ -94,7 +95,7 @@ export class AuthService {
     }
   
     const accessToken = await this.signToken(user.id);
-    return { accessToken, user };
+    return { accessToken, user:sanitizeUser(user) };
   }
 
   async signToken(userId: string): Promise<string> {
@@ -103,8 +104,5 @@ export class AuthService {
 
 
 
-  private sanitizeUser(user: any) {
-    const { passwordHash, ...rest } = user;
-    return rest;
-  }
+  
 }
